@@ -1,3 +1,4 @@
+import 'package:http/http.dart';
 
 import 'package:flutter/material.dart';
 import 'package:test_clima_flutter/services/networking.dart';
@@ -19,6 +20,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
     getWeatherData();
   }
 
+
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
@@ -32,10 +34,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
 
+
   void getWeatherData() async{
     Networking networking = new Networking();
     String data = await networking.getData();
-
 
     Navigator.push(context, MaterialPageRoute(builder: (context){
       return LocationScreen(data);
@@ -43,3 +45,5 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
 }
+
+

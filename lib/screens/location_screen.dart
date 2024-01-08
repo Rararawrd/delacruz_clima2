@@ -3,7 +3,7 @@ import 'package:test_clima_flutter/screens/city_screen.dart';
 import 'package:test_clima_flutter/utilities/constants.dart';
 import 'dart:convert';
 import 'package:test_clima_flutter/services/weather.dart';
-import 'package:test_clima_flutter/screens/city_screen.dart';
+import 'package:test_clima_flutter/services/networking.dart';
 
 class LocationScreen extends StatefulWidget {
   LocationScreen(this.data, {super.key});
@@ -14,9 +14,10 @@ class LocationScreen extends StatefulWidget {
 }
 
 class _LocationScreenState extends State<LocationScreen> {
-  double temp=0;
-  String city='', info='', weathericon='', weathermessage='';
-  int ID=0;
+  double temp = 0;
+  int id = 0;
+  String city = '', info = '', weathericon = '', weathermsg = '', update = '';
+  bool error = false;
 
   @override
   void initState() {
@@ -25,17 +26,21 @@ class _LocationScreenState extends State<LocationScreen> {
     updateUI();
   }
 
-  void updateUI(){
-    temp = jsonDecode(info)['main']['temp'];
-    city = jsonDecode(info)['name'];
-    ID = jsonDecode(info)['weather'][0]['id'];
-    print(city);
-    print(temp);
-    print(ID);
+  void updateUI() {
+    setState(() {
+      city = jsonDecode(info)['name'];
+      temp = jsonDecode(info)['main']['temp'];
+      id = jsonDecode(info)['weather'][0]['id'];
+      error = false;
+      print(city);
+      print(temp);
+      print(id);
+      print(info);
 
-    WeatherModel weatherModel = new WeatherModel();
-    weathericon = weatherModel.getWeatherIcon(ID);
-    weathermessage = weatherModel.getMessage(temp.toInt());
+      WeatherModel weatherModel = new WeatherModel();
+      weathericon = weatherModel.getWeatherIcon(id);
+      weathermsg = weatherModel.getMessage(temp.toInt());
+    });
   }
 
   @override
@@ -60,19 +65,44 @@ class _LocationScreenState extends State<LocationScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      Networking netting = new Networking();
+                      update = await netting.getData();
+                      setState(() {
+                        info = update;
+                        updateUI();
+                        error = false;
+                      });
+                    },
                     child: const Icon(
-                      Icons.near_me,
+                      Icons.near_me, //eto yung default location btn
                       size: 50.0,
                     ),
                   ),
                   TextButton(
-                    onPressed: () async{
+                    onPressed: () async {
                       String newcity;
-                      newcity = await Navigator.push(context, MaterialPageRoute(builder: (context){
-                        return CityScreen();
-                      }));
-                      print(newcity);
+                      newcity = await Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                            return const CityScreen();
+                          }));
+                      Networking netted = new Networking();
+
+                      try {
+                        update = await netted.getCity(newcity);
+
+                        setState(() {
+                          info = update;
+                          updateUI();
+                          error = false;
+                        });
+                      } catch (e) {
+                        setState(() {
+                          weathermsg = e.toString();
+                          city = "";
+                          error = true;
+                        });
+                      }
                     },
                     child: const Icon(
                       Icons.location_city,
@@ -82,24 +112,27 @@ class _LocationScreenState extends State<LocationScreen> {
                 ],
               ),
               Padding(
-                padding: EdgeInsets.only(left: 15.0),
+                padding: const EdgeInsets.only(left: 15.0),
                 child: Row(
                   children: <Widget>[
+                    if (!error)
+                      Text(
+                        temp.toStringAsFixed(0) + '°', //eto yung temp ng city
+                        style: kTempTextStyle,
+                      ),
                     Text(
-                      temp.toStringAsFixed(0)+'°',
-                      style: kTempTextStyle,
-                    ),
-                    Text(
-                      weathericon,
+                      error ? 'Error' : weathericon,
                       style: kConditionTextStyle,
                     ),
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.only(right: 15.0),
+                padding: const EdgeInsets.only(right: 15.0),
                 child: Text(
-                  "$weathermessage in $city",
+                  error
+                      ? weathermsg
+                      : "$weathermsg in $city", //eto yung text message
                   textAlign: TextAlign.right,
                   style: kMessageTextStyle,
                 ),

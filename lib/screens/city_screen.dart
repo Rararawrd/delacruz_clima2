@@ -8,7 +8,8 @@ class CityScreen extends StatefulWidget {
 }
 
 class _CityScreenState extends State<CityScreen> {
-  String newcity='';
+  String newcity = '';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,7 +27,9 @@ class _CityScreenState extends State<CityScreen> {
               Align(
                 alignment: Alignment.topLeft,
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
                   child: const Icon(
                     Icons.arrow_back_ios,
                     size: 50.0,
@@ -36,7 +39,7 @@ class _CityScreenState extends State<CityScreen> {
               Container(
                 padding: const EdgeInsets.all(20.0),
                 child: TextField(
-                  onChanged: (value){
+                  onChanged: (value) {
                     newcity = value;
                   },
                   style: const TextStyle(
@@ -48,15 +51,12 @@ class _CityScreenState extends State<CityScreen> {
                     icon: Icon(
                       Icons.location_city,
                       color: Colors.white,
+                      size: 50,
                     ),
                     hintText: 'Type your city here',
-                    hintStyle: TextStyle(
-                      color: Colors.grey,
-                    ),
+                    hintStyle: TextStyle(color: Colors.grey),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(10.0),
-                      ),
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
                       borderSide: BorderSide.none,
                     ),
                   ),
@@ -64,7 +64,7 @@ class _CityScreenState extends State<CityScreen> {
               ),
               TextButton(
                 onPressed: () {
-                  Navigator.pop(context,newcity);
+                  Navigator.pop(context, newcity);
                 },
                 child: const Text(
                   'Get Weather',
